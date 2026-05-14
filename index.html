@@ -16,8 +16,8 @@
             --success-color: #27ae60;
             --whatsapp-color: #25D366;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { background-color: var(--bg-color); margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; border: 1px solid #eee; }
         .titulo { color: var(--secondary-color); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
         .subtitulo { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
@@ -28,10 +28,24 @@
         .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
         .btn-descargar { background: #3498db; color: white; }
         .btn-whatsapp { background: var(--whatsapp-color); color: white; }
-        .scratch-container { position: relative; width: 280px; height: 150px; margin: 0 auto; border: 5px solid var(--primary-color); border-radius: 20px; overflow: hidden; background: #fff; }
+        
+        /* Contenedor del raspable con bloqueo de scroll para que no falle el dedo */
+        .scratch-container { 
+            position: relative; 
+            width: 280px; 
+            height: 150px; 
+            margin: 0 auto; 
+            border: 5px solid var(--primary-color); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            background: #fff;
+            touch-action: none; /* Crucial: evita que el navegador mueva la página al raspar */
+        }
+        
         .prize-under { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; }
         .monto-premio { font-size: 42px; font-weight: 900; color: var(--success-color); margin: 0; }
-        #scratchCanvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 2; }
+        #scratchCanvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+        
         #captura-cupon { background: white; padding: 20px; border: 2px dashed var(--primary-color); border-radius: 15px; margin-bottom: 20px; }
         #area-qr { display: flex; justify-content: center; margin: 15px 0; min-height: 150px; align-items: center; }
         .hidden { display: none !important; }
@@ -53,14 +67,14 @@
     </div>
 
     <div id="paso-juego" class="hidden">
-        <div class="scratch-container">
+        <div class="scratch-container" id="container">
             <div class="prize-under">
                 <p id="texto-premio" class="monto-premio"></p> 
                 <p style="font-weight: bold; margin: 0;">DESC. GNC</p>
             </div>
             <canvas id="scratchCanvas" width="280" height="150"></canvas>
         </div>
-        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá para descubrir tu premio</p>
+        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá con el dedo para ganar</p>
     </div>
 
     <div id="paso-cupon" class="hidden">
@@ -102,13 +116,12 @@
             const tiempoTranscurrido = (ahora - registroCargas[patenteCliente]) / 1000 / 60;
             if (tiempoTranscurrido < TIEMPO_ESPERA_MINUTOS) {
                 const faltan = Math.ceil(TIEMPO_ESPERA_MINUTOS - tiempoTranscurrido);
-                msgError.innerText = `Esta patente ya jugó. Intentá nuevamente en ${faltan} minutos.`;
+                msgError.innerText = `Esta patente ya jugó. Falta: ${faltan} min.`;
                 msgError.style.display = 'block';
                 return;
             }
         }
 
-        // ASIGNACIÓN DE NUEVOS DATOS
         registroCargas[patenteCliente] = ahora;
         localStorage.setItem('gnc_registro_patentes', JSON.stringify(registroCargas));
 
@@ -123,57 +136,72 @@
         
         document.getElementById('paso-registro').classList.add('hidden');
         document.getElementById('paso-juego').classList.remove('hidden');
-        iniciarJuego();
+        
+        // Esperamos un milisegundo para que el canvas se dibuje bien
+        setTimeout(iniciarJuego, 50);
     }
 
     function iniciarJuego() {
         const canvas = document.getElementById('scratchCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
         let isDrawing = false;
         
+        // Rellenar capa gris
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Texto guía
         ctx.fillStyle = '#7f8c8d';
-        ctx.font = 'bold 16px Arial';
+        ctx.font = 'bold 18px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('RASPÁ AQUÍ', canvas.width / 2, canvas.height / 2 + 5);
+        ctx.fillText('¡RASPÁ AQUÍ!', canvas.width / 2, canvas.height / 2 + 7);
 
-        const scratch = (e) => {
-            if (!isDrawing) return;
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 45;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.arc(x, y, 25, 0, Math.PI * 2);
-            ctx.fill();
-        };
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-        canvas.addEventListener('mousedown', () => isDrawing = true);
-        window.addEventListener('mouseup', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
-        canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); }, {passive:false});
-        canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); }, {passive:false});
-        canvas.addEventListener('touchend', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Eventos Mouse
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; draw(e); });
+        window.addEventListener('mouseup', () => { if(isDrawing) { isDrawing = false; verificarProgreso(ctx, canvas); } });
+        canvas.addEventListener('mousemove', draw);
+
+        // Eventos Touch (Celulares)
+        canvas.addEventListener('touchstart', (e) => { isDrawing = true; draw(e); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { draw(e); }, { passive: false });
+        canvas.addEventListener('touchend', () => { if(isDrawing) { isDrawing = false; verificarProgreso(ctx, canvas); } });
     }
 
     function verificarProgreso(ctx, canvas) {
         const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let hits = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] === 0) hits++;
-        if (hits > (data.length / 4) * 0.5) {
-            setTimeout(() => {
-                document.getElementById('paso-juego').classList.add('hidden');
-                document.getElementById('paso-cupon').classList.remove('hidden');
-                document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
-                document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
-                document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
-                const qrContainer = document.getElementById("area-qr");
-                qrContainer.innerHTML = "";
-                new QRCode(qrContainer, { text: `ID:${codigoUnico}|VAL:${premioAsignado}`, width: 150, height: 150 });
-            }, 300);
+        
+        if (hits > (data.length / 4) * 0.4) { // Bajé al 40% para que sea más fácil ganar
+            document.getElementById('paso-juego').classList.add('hidden');
+            document.getElementById('paso-cupon').classList.remove('hidden');
+            document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
+            document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
+            document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
+            const qrContainer = document.getElementById("area-qr");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, { text: `ID:${codigoUnico}|VAL:${premioAsignado}`, width: 150, height: 150 });
         }
     }
 
@@ -191,27 +219,8 @@
         });
     }
 
-    // --- LIMPIEZA TOTAL PARA NUEVA CARGA ---
     function reiniciarTodo() {
-        // 1. Resetear variables lógicas
-        premioAsignado = "";
-        codigoUnico = "";
-        patenteCliente = "";
-
-        // 2. Limpiar visualmente el HTML
-        document.getElementById('reg-patente').value = "";
-        document.getElementById('mensaje-error').style.display = 'none';
-        document.getElementById('mensaje-error').innerText = "";
-        document.getElementById('area-qr').innerHTML = "";
-        document.getElementById('txt-premio-foto').innerText = "";
-        document.getElementById('txt-patente-foto').innerText = "";
-        document.getElementById('txt-id-foto').innerText = "";
-        document.getElementById('texto-premio').innerText = "";
-
-        // 3. Volver a la primera pantalla
-        document.getElementById('paso-cupon').classList.add('hidden');
-        document.getElementById('paso-juego').classList.add('hidden');
-        document.getElementById('paso-registro').classList.remove('hidden');
+        location.reload(); // La forma más limpia de resetear todo el motor de raspado
     }
 </script>
 </body>

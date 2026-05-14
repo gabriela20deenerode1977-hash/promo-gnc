@@ -218,10 +218,10 @@
         localStorage.setItem('registro_promo_gnc', JSON.stringify(registro));
 
         const rand = Math.random() * 100;
-        if (rand < 5) premioAsignado = "20% OFF";
-        else if (rand < 25) premioAsignado = "15% OFF";
-        else if (rand < 60) premioAsignado = "10% OFF";
-        else premioAsignado = "5% OFF";
+        if (rand < 5) premioAsignado = "20%";
+        else if (rand < 25) premioAsignado = "15%";
+        else if (rand < 60) premioAsignado = "10%";
+        else premioAsignado = "5%";
 
         codigoUnico = "GNC-" + Math.random().toString(36).substr(2, 5).toUpperCase() + "-" + Date.now().toString().slice(-4);
 
@@ -291,8 +291,10 @@
                 
                 const qrContainer = document.getElementById("area-qr");
                 qrContainer.innerHTML = "";
+                
+                // CAMBIO CLAVE AQUÍ: Formato simplificado para que el validador no se pierda
                 new QRCode(qrContainer, {
-                    text: `ID:${codigoUnico}|PAT:${patenteCliente}|PREMIO:${premioAsignado}`,
+                    text: `ID:${codigoUnico}|VAL:${premioAsignado}`, 
                     width: 150,
                     height: 150
                 });
@@ -314,7 +316,7 @@
         const msg = encodeURIComponent(
             `*⛽ MI CUPÓN DE DESCUENTO GNC*\n\n` +
             `🚗 *Patente:* ${patenteCliente}\n` +
-            `🎁 *Premio:* ${premioAsignado}\n` +
+            `🎁 *Premio:* ${premioAsignado} OFF\n` +
             `🆔 *Código:* ${codigoUnico}\n`
         );
         window.open(`https://wa.me/?text=${msg}`, '_blank');

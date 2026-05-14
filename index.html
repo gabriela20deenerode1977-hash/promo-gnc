@@ -14,6 +14,7 @@
             --secondary-color: #2c3e50;
             --bg-color: #f8f9fa;
             --success-color: #27ae60;
+            --whatsapp-color: #25D366;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -53,7 +54,6 @@
             outline: none;
             transition: all 0.3s;
         }
-        .input-group input:focus { border-color: var(--primary-color); }
 
         .btn {
             width: 100%;
@@ -64,10 +64,16 @@
             cursor: pointer;
             font-size: 16px;
             margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
         }
 
         .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
         .btn-descargar { background: #3498db; color: white; }
+        .btn-whatsapp { background: var(--whatsapp-color); color: white; }
 
         .scratch-container {
             position: relative;
@@ -133,11 +139,6 @@
             <input type="text" id="reg-patente" placeholder="EJ: AF123BK" maxlength="9">
         </div>
         
-        <div class="input-group">
-            <label>Tu WhatsApp (opcional)</label>
-            <input type="tel" id="reg-whatsapp" placeholder="1127098175">
-        </div>
-
         <button onclick="validarYEmpezar()" class="btn btn-principal">Validar y Jugar</button>
     </div>
 
@@ -161,8 +162,10 @@
             <div id="txt-id-foto" style="font-size: 10px; color: #bdc3c7; margin-top: 10px;"></div>
         </div>
         
+        <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">📲 ENVIAR AL PLAYERO</button>
         <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
-        <p class="nota-recuerdo">💡 Si cerrás esta ventana, tu cupón seguirá aquí al volver hoy.</p>
+        
+        <p class="nota-recuerdo">💡 Al hacer clic en enviar, se notificará el premio a la estación.</p>
     </div>
 </div>
 
@@ -170,12 +173,11 @@
     let premioAsignado = "";
     let codigoUnico = "";
     let patenteCliente = "";
+    const TELEFONO_ESTACION = "5491127098175"; // Formato internacional sin símbolos
 
-    // AL CARGAR: Verificar si ya tiene un cupón de hoy
     window.onload = function() {
         const guardado = JSON.parse(localStorage.getItem('cupon_gnc_cliente'));
         const hoy = new Date().toDateString();
-
         if (guardado && guardado.fecha === hoy) {
             mostrarPasoCupon(guardado);
         }
@@ -205,15 +207,9 @@
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
-
         document.getElementById('texto-premio').innerText = premioAsignado;
-
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#7f8c8d';
-        ctx.font = 'bold 16px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('RASPÁ AQUÍ', canvas.width / 2, canvas.height / 2 + 5);
 
         const scratch = (e) => {
             if (!isDrawing) return;
@@ -221,10 +217,10 @@
             const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
             const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 40;
+            ctx.lineWidth = 45;
             ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
             ctx.fill();
         };
 
@@ -254,6 +250,11 @@
     }
 
     function mostrarPasoCupon(datos) {
+        // Actualizar variables globales por si se recupera de localStorage
+        premioAsignado = datos.premio;
+        codigoUnico = datos.id;
+        patenteCliente = datos.patente;
+
         document.getElementById('paso-registro').classList.add('hidden');
         document.getElementById('paso-juego').classList.add('hidden');
         document.getElementById('paso-cupon').classList.remove('hidden');
@@ -268,6 +269,17 @@
             text: `ID:${datos.id}|VAL:${datos.premio}`,
             width: 150, height: 150
         });
+    }
+
+    function enviarWhatsApp() {
+        const mensaje = encodeURIComponent(
+            `*⛽ NUEVO CUPÓN DE DESCUENTO GNC*\n\n` +
+            `🚗 *Patente:* ${patenteCliente}\n` +
+            `🎁 *Premio:* ${premioAsignado} OFF\n` +
+            `🆔 *Código:* ${codigoUnico}\n\n` +
+            `_Presente este mensaje al playero para validar._`
+        );
+        window.open(`https://wa.me/${TELEFONO_ESTACION}?text=${mensaje}`, '_blank');
     }
 
     function descargarCupon() {

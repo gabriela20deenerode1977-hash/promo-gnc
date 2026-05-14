@@ -50,8 +50,10 @@
             padding: 14px;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 18px;
+            text-transform: uppercase;
             outline: none;
+            text-align: center;
         }
 
         .btn {
@@ -67,12 +69,11 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            text-decoration: none;
         }
 
         .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
-        .btn-descargar { background: #3498db; color: white; }
-        .btn-whatsapp { background: var(--whatsapp-color); color: white; }
+        .btn-descargar { background: #3498db; color: white; text-decoration: none; }
+        .btn-whatsapp { background: var(--whatsapp-color); color: white; text-decoration: none; }
 
         .scratch-container {
             position: relative;
@@ -114,9 +115,19 @@
             margin-bottom: 20px;
         }
 
-        #area-qr { display: flex; justify-content: center; margin: 15px 0; }
+        #area-qr { display: flex; justify-content: center; margin: 15px 0; min-height: 150px; align-items: center; }
         
         .hidden { display: none !important; }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -124,11 +135,13 @@
 <div class="card">
     <div id="paso-registro">
         <h2 class="titulo">¡Promo GNC!</h2>
-        <p class="subtitulo">Ingresá tu patente para jugar.</p>
+        <p class="subtitulo">Ingresá tu patente para participar.</p>
         
+        <div id="mensaje-error" class="error-msg"></div>
+
         <div class="input-group">
             <label>Patente del Vehículo</label>
-            <input type="text" id="reg-patente" placeholder="EJ: AF123BK" maxlength="9">
+            <input type="text" id="reg-patente" placeholder="AF123BK" maxlength="9">
         </div>
         
         <button onclick="validarYEmpezar()" class="btn btn-principal">Validar y Jugar</button>
@@ -137,12 +150,12 @@
     <div id="paso-juego" class="hidden">
         <div class="scratch-container">
             <div class="prize-under">
-                <p id="texto-premio" class="monto-premio">--%</p> 
+                <p id="texto-premio" class="monto-premio"></p> 
                 <p style="font-weight: bold; margin: 0;">DESC. GNC</p>
             </div>
             <canvas id="scratchCanvas" width="280" height="150"></canvas>
         </div>
-        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá para ver tu premio</p>
+        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá para descubrir tu premio</p>
     </div>
 
     <div id="paso-cupon" class="hidden">
@@ -156,7 +169,7 @@
         
         <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">📲 ENVIAR AL PLAYERO</button>
         <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
-        <button onclick="reiniciarJuego()" class="btn" style="background:#eee; color:#666; font-size:12px;">🔄 JUGAR DE NUEVO</button>
+        <button onclick="reiniciarTodo()" class="btn" style="background:#eee; color:#666; font-size:12px;">🔄 NUEVA CARGA</button>
     </div>
 </div>
 
@@ -165,17 +178,39 @@
     let codigoUnico = "";
     let patenteCliente = "";
     const TELEFONO_ESTACION = "5491127098175";
-
-    // ELIMINAMOS LA FUNCIÓN WINDOW.ONLOAD QUE AUTO-CARGABA EL CUPÓN ANTERIOR
-    // Ahora siempre empezará en el registro.
+    const TIEMPO_ESPERA_MINUTOS = 120; // 2 HORAS
 
     function validarYEmpezar() {
-        patenteCliente = document.getElementById('reg-patente').value.trim().toUpperCase();
-        if (patenteCliente.length < 5) {
+        const inputPatente = document.getElementById('reg-patente');
+        const msgError = document.getElementById('mensaje-error');
+        patenteCliente = inputPatente.value.trim().toUpperCase();
+        msgError.style.display = 'none';
+
+        if (patenteCliente.length < 6) {
             alert("Por favor, ingresá una patente válida.");
             return;
         }
 
+        // --- LÓGICA DE BLOQUEO POR TIEMPO ---
+        const registroCargas = JSON.parse(localStorage.getItem('gnc_registro_patentes') || '{}');
+        const ahora = Date.now();
+
+        if (registroCargas[patenteCliente]) {
+            const tiempoTranscurrido = (ahora - registroCargas[patenteCliente]) / 1000 / 60; // en minutos
+            
+            if (tiempoTranscurrido < TIEMPO_ESPERA_MINUTOS) {
+                const faltan = Math.ceil(TIEMPO_ESPERA_MINUTOS - tiempoTranscurrido);
+                msgError.innerText = `Esta patente ya jugó. Intentá nuevamente en ${faltan} minutos.`;
+                msgError.style.display = 'block';
+                return;
+            }
+        }
+
+        // Si pasó el tiempo o es nueva, guardamos el momento actual
+        registroCargas[patenteCliente] = ahora;
+        localStorage.setItem('gnc_registro_patentes', JSON.stringify(registroCargas));
+
+        // Generar premio
         const rand = Math.random() * 100;
         if (rand < 5) premioAsignado = "20%";
         else if (rand < 25) premioAsignado = "15%";
@@ -183,7 +218,8 @@
         else premioAsignado = "5%";
 
         codigoUnico = "GNC-" + Math.random().toString(36).substr(2, 5).toUpperCase();
-
+        document.getElementById('texto-premio').innerText = premioAsignado;
+        
         document.getElementById('paso-registro').classList.add('hidden');
         document.getElementById('paso-juego').classList.remove('hidden');
         iniciarJuego();
@@ -193,12 +229,13 @@
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
-        document.getElementById('texto-premio').innerText = premioAsignado;
-        
-        // Limpiar canvas anterior por si juega de nuevo
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#7f8c8d';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('RASPÁ AQUÍ', canvas.width / 2, canvas.height / 2 + 5);
 
         const scratch = (e) => {
             if (!isDrawing) return;
@@ -225,52 +262,39 @@
         const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let hits = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] === 0) hits++;
-        
         if (hits > (data.length / 4) * 0.5) {
-            setTimeout(() => mostrarPasoCupon(), 300);
+            setTimeout(() => {
+                document.getElementById('paso-juego').classList.add('hidden');
+                document.getElementById('paso-cupon').classList.remove('hidden');
+                document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
+                document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
+                document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
+                const qrContainer = document.getElementById("area-qr");
+                qrContainer.innerHTML = "";
+                new QRCode(qrContainer, { text: `ID:${codigoUnico}|VAL:${premioAsignado}`, width: 150, height: 150 });
+            }, 300);
         }
     }
 
-    function mostrarPasoCupon() {
-        document.getElementById('paso-juego').classList.add('hidden');
-        document.getElementById('paso-cupon').classList.remove('hidden');
-
-        document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
-        document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
-        document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
-
-        const qrContainer = document.getElementById("area-qr");
-        qrContainer.innerHTML = "";
-        new QRCode(qrContainer, {
-            text: `ID:${codigoUnico}|VAL:${premioAsignado}`,
-            width: 150, height: 150
-        });
-    }
-
     function enviarWhatsApp() {
-        const mensaje = encodeURIComponent(
-            `*⛽ NUEVO CUPÓN DE DESCUENTO GNC*\n\n` +
-            `🚗 *Patente:* ${patenteCliente}\n` +
-            `🎁 *Premio:* ${premioAsignado} OFF\n` +
-            `🆔 *Código:* ${codigoUnico}\n\n` +
-            `_Presente este mensaje al playero para validar._`
-        );
+        const mensaje = encodeURIComponent(`*⛽ NUEVO CUPÓN GNC*\n🚗 *Patente:* ${patenteCliente}\n🎁 *Premio:* ${premioAsignado} OFF\n🆔 *Código:* ${codigoUnico}`);
         window.open(`https://wa.me/${TELEFONO_ESTACION}?text=${mensaje}`, '_blank');
     }
 
     function descargarCupon() {
         html2canvas(document.getElementById('captura-cupon')).then(canvas => {
             const link = document.createElement('a');
-            link.download = `Cupon-GNC-${patenteCliente}.png`;
+            link.download = `GNC-${patenteCliente}.png`;
             link.href = canvas.toDataURL();
             link.click();
         });
     }
 
-    function reiniciarJuego() {
+    function reiniciarTodo() {
+        document.getElementById('reg-patente').value = "";
+        document.getElementById('mensaje-error').style.display = 'none';
         document.getElementById('paso-cupon').classList.add('hidden');
         document.getElementById('paso-registro').classList.remove('hidden');
-        document.getElementById('reg-patente').value = "";
     }
 </script>
 </body>

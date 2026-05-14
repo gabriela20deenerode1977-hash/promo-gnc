@@ -16,118 +16,26 @@
             --success-color: #27ae60;
             --whatsapp-color: #25D366;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background-color: var(--bg-color);
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 380px;
-            text-align: center;
-            border: 1px solid #eee;
-        }
-
+        body { background-color: var(--bg-color); margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; border: 1px solid #eee; }
         .titulo { color: var(--secondary-color); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
-        .subtitulo { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; line-height: 1.4; }
-
+        .subtitulo { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
         .input-group { text-align: left; margin-bottom: 18px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--secondary-color); margin-bottom: 8px; }
-        .input-group input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 18px;
-            text-transform: uppercase;
-            outline: none;
-            text-align: center;
-        }
-
-        .btn {
-            width: 100%;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
+        .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        .input-group input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 18px; text-transform: uppercase; text-align: center; outline: none; }
+        .btn { width: 100%; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
         .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
-        .btn-descargar { background: #3498db; color: white; text-decoration: none; }
-        .btn-whatsapp { background: var(--whatsapp-color); color: white; text-decoration: none; }
-
-        .scratch-container {
-            position: relative;
-            width: 280px;
-            height: 150px;
-            margin: 0 auto;
-            border: 5px solid var(--primary-color);
-            border-radius: 20px;
-            overflow: hidden;
-            background: #fff;
-        }
-
-        .prize-under {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1;
-        }
-
+        .btn-descargar { background: #3498db; color: white; }
+        .btn-whatsapp { background: var(--whatsapp-color); color: white; }
+        .scratch-container { position: relative; width: 280px; height: 150px; margin: 0 auto; border: 5px solid var(--primary-color); border-radius: 20px; overflow: hidden; background: #fff; }
+        .prize-under { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; }
         .monto-premio { font-size: 42px; font-weight: 900; color: var(--success-color); margin: 0; }
-        
-        #scratchCanvas { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            touch-action: none; 
-            z-index: 2;
-        }
-
-        #captura-cupon {
-            background: white;
-            padding: 20px;
-            border: 2px dashed var(--primary-color);
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-
+        #scratchCanvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 2; }
+        #captura-cupon { background: white; padding: 20px; border: 2px dashed var(--primary-color); border-radius: 15px; margin-bottom: 20px; }
         #area-qr { display: flex; justify-content: center; margin: 15px 0; min-height: 150px; align-items: center; }
-        
         .hidden { display: none !important; }
-
-        .error-msg {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 15px;
-            display: none;
-        }
+        .error-msg { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -135,15 +43,12 @@
 <div class="card">
     <div id="paso-registro">
         <h2 class="titulo">¡Promo GNC!</h2>
-        <p class="subtitulo">Ingresá tu patente para participar.</p>
-        
+        <p class="subtitulo">Ingresá tu patente para jugar.</p>
         <div id="mensaje-error" class="error-msg"></div>
-
         <div class="input-group">
             <label>Patente del Vehículo</label>
             <input type="text" id="reg-patente" placeholder="AF123BK" maxlength="9">
         </div>
-        
         <button onclick="validarYEmpezar()" class="btn btn-principal">Validar y Jugar</button>
     </div>
 
@@ -166,7 +71,6 @@
             <div id="txt-patente-foto" style="font-weight: bold; margin-top: 5px; font-family: monospace;"></div>
             <div id="txt-id-foto" style="font-size: 10px; color: #bdc3c7; margin-top: 10px;"></div>
         </div>
-        
         <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">📲 ENVIAR AL PLAYERO</button>
         <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
         <button onclick="reiniciarTodo()" class="btn" style="background:#eee; color:#666; font-size:12px;">🔄 NUEVA CARGA</button>
@@ -178,7 +82,7 @@
     let codigoUnico = "";
     let patenteCliente = "";
     const TELEFONO_ESTACION = "5491127098175";
-    const TIEMPO_ESPERA_MINUTOS = 120; // 2 HORAS
+    const TIEMPO_ESPERA_MINUTOS = 120;
 
     function validarYEmpezar() {
         const inputPatente = document.getElementById('reg-patente');
@@ -191,13 +95,11 @@
             return;
         }
 
-        // --- LÓGICA DE BLOQUEO POR TIEMPO ---
         const registroCargas = JSON.parse(localStorage.getItem('gnc_registro_patentes') || '{}');
         const ahora = Date.now();
 
         if (registroCargas[patenteCliente]) {
-            const tiempoTranscurrido = (ahora - registroCargas[patenteCliente]) / 1000 / 60; // en minutos
-            
+            const tiempoTranscurrido = (ahora - registroCargas[patenteCliente]) / 1000 / 60;
             if (tiempoTranscurrido < TIEMPO_ESPERA_MINUTOS) {
                 const faltan = Math.ceil(TIEMPO_ESPERA_MINUTOS - tiempoTranscurrido);
                 msgError.innerText = `Esta patente ya jugó. Intentá nuevamente en ${faltan} minutos.`;
@@ -206,11 +108,10 @@
             }
         }
 
-        // Si pasó el tiempo o es nueva, guardamos el momento actual
+        // ASIGNACIÓN DE NUEVOS DATOS
         registroCargas[patenteCliente] = ahora;
         localStorage.setItem('gnc_registro_patentes', JSON.stringify(registroCargas));
 
-        // Generar premio
         const rand = Math.random() * 100;
         if (rand < 5) premioAsignado = "20%";
         else if (rand < 25) premioAsignado = "15%";
@@ -229,6 +130,7 @@
         const canvas = document.getElementById('scratchCanvas');
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
+        
         ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -252,7 +154,6 @@
 
         canvas.addEventListener('mousedown', () => isDrawing = true);
         window.addEventListener('mouseup', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
-        canvas.addEventListener('mousemove', scratch);
         canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); }, {passive:false});
         canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); }, {passive:false});
         canvas.addEventListener('touchend', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
@@ -290,10 +191,26 @@
         });
     }
 
+    // --- LIMPIEZA TOTAL PARA NUEVA CARGA ---
     function reiniciarTodo() {
+        // 1. Resetear variables lógicas
+        premioAsignado = "";
+        codigoUnico = "";
+        patenteCliente = "";
+
+        // 2. Limpiar visualmente el HTML
         document.getElementById('reg-patente').value = "";
         document.getElementById('mensaje-error').style.display = 'none';
+        document.getElementById('mensaje-error').innerText = "";
+        document.getElementById('area-qr').innerHTML = "";
+        document.getElementById('txt-premio-foto').innerText = "";
+        document.getElementById('txt-patente-foto').innerText = "";
+        document.getElementById('txt-id-foto').innerText = "";
+        document.getElementById('texto-premio').innerText = "";
+
+        // 3. Volver a la primera pantalla
         document.getElementById('paso-cupon').classList.add('hidden');
+        document.getElementById('paso-juego').classList.add('hidden');
         document.getElementById('paso-registro').classList.remove('hidden');
     }
 </script>

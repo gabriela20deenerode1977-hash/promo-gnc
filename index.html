@@ -52,7 +52,6 @@
             border-radius: 12px;
             font-size: 16px;
             outline: none;
-            transition: all 0.3s;
         }
 
         .btn {
@@ -118,13 +117,6 @@
         #area-qr { display: flex; justify-content: center; margin: 15px 0; }
         
         .hidden { display: none !important; }
-
-        .nota-recuerdo {
-            font-size: 11px;
-            color: #95a5a6;
-            margin-top: 15px;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
@@ -164,8 +156,7 @@
         
         <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">📲 ENVIAR AL PLAYERO</button>
         <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
-        
-        <p class="nota-recuerdo">💡 Al hacer clic en enviar, se notificará el premio a la estación.</p>
+        <button onclick="reiniciarJuego()" class="btn" style="background:#eee; color:#666; font-size:12px;">🔄 JUGAR DE NUEVO</button>
     </div>
 </div>
 
@@ -173,15 +164,10 @@
     let premioAsignado = "";
     let codigoUnico = "";
     let patenteCliente = "";
-    const TELEFONO_ESTACION = "5491127098175"; // Formato internacional sin símbolos
+    const TELEFONO_ESTACION = "5491127098175";
 
-    window.onload = function() {
-        const guardado = JSON.parse(localStorage.getItem('cupon_gnc_cliente'));
-        const hoy = new Date().toDateString();
-        if (guardado && guardado.fecha === hoy) {
-            mostrarPasoCupon(guardado);
-        }
-    };
+    // ELIMINAMOS LA FUNCIÓN WINDOW.ONLOAD QUE AUTO-CARGABA EL CUPÓN ANTERIOR
+    // Ahora siempre empezará en el registro.
 
     function validarYEmpezar() {
         patenteCliente = document.getElementById('reg-patente').value.trim().toUpperCase();
@@ -208,6 +194,9 @@
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
         document.getElementById('texto-premio').innerText = premioAsignado;
+        
+        // Limpiar canvas anterior por si juega de nuevo
+        ctx.globalCompositeOperation = 'source-over';
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -238,35 +227,22 @@
         for (let i = 3; i < data.length; i += 4) if (data[i] === 0) hits++;
         
         if (hits > (data.length / 4) * 0.5) {
-            const datos = {
-                id: codigoUnico,
-                patente: patenteCliente,
-                premio: premioAsignado,
-                fecha: new Date().toDateString()
-            };
-            localStorage.setItem('cupon_gnc_cliente', JSON.stringify(datos));
-            setTimeout(() => mostrarPasoCupon(datos), 300);
+            setTimeout(() => mostrarPasoCupon(), 300);
         }
     }
 
-    function mostrarPasoCupon(datos) {
-        // Actualizar variables globales por si se recupera de localStorage
-        premioAsignado = datos.premio;
-        codigoUnico = datos.id;
-        patenteCliente = datos.patente;
-
-        document.getElementById('paso-registro').classList.add('hidden');
+    function mostrarPasoCupon() {
         document.getElementById('paso-juego').classList.add('hidden');
         document.getElementById('paso-cupon').classList.remove('hidden');
 
-        document.getElementById('txt-premio-foto').innerText = datos.premio + " OFF";
-        document.getElementById('txt-patente-foto').innerText = "PATENTE: " + datos.patente;
-        document.getElementById('txt-id-foto').innerText = "ID: " + datos.id;
+        document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
+        document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
+        document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
 
         const qrContainer = document.getElementById("area-qr");
         qrContainer.innerHTML = "";
         new QRCode(qrContainer, {
-            text: `ID:${datos.id}|VAL:${datos.premio}`,
+            text: `ID:${codigoUnico}|VAL:${premioAsignado}`,
             width: 150, height: 150
         });
     }
@@ -289,6 +265,12 @@
             link.href = canvas.toDataURL();
             link.click();
         });
+    }
+
+    function reiniciarJuego() {
+        document.getElementById('paso-cupon').classList.add('hidden');
+        document.getElementById('paso-registro').classList.remove('hidden');
+        document.getElementById('reg-patente').value = "";
     }
 </script>
 </body>

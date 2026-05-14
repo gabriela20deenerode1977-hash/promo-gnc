@@ -4,25 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Promo GNC - Raspá y Ganá</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
-        :root { --primary-color: #f1c40f; --secondary-color: #2c3e50; --bg-color: #f8f9fa; --success-color: #27ae60; }
+        :root {
+            --primary-color: #f1c40f;
+            --secondary-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --success-color: #27ae60;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; }
-        .titulo { color: var(--secondary-color); font-weight: 800; margin-bottom: 5px; }
-        .input-group { text-align: left; margin-bottom: 15px; }
-        label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 16px; }
-        .btn { width: 100%; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-principal { background: var(--primary-color); }
-        .scratch-container { position: relative; width: 280px; height: 150px; margin: 0 auto; border: 4px solid var(--primary-color); border-radius: 15px; overflow: hidden; }
-        .prize-under { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .monto-premio { font-size: 40px; font-weight: 900; color: var(--success-color); margin: 0; }
-        #scratchCanvas { position: absolute; top: 0; left: 0; touch-action: none; z-index: 2; }
-        #captura-cupon { background: white; padding: 20px; border: 2px dashed #ccc; border-radius: 15px; margin-bottom: 15px; }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .titulo { color: var(--secondary-color); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
+        .subtitulo { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; line-height: 1.4; }
+
+        .input-group { text-align: left; margin-bottom: 18px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 700; color: var(--secondary-color); margin-bottom: 8px; }
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-group input:focus { border-color: var(--primary-color); }
+
+        .btn {
+            width: 100%;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
+        .btn-descargar { background: #3498db; color: white; }
+
+        .scratch-container {
+            position: relative;
+            width: 280px;
+            height: 150px;
+            margin: 0 auto;
+            border: 5px solid var(--primary-color);
+            border-radius: 20px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .prize-under {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .monto-premio { font-size: 42px; font-weight: 900; color: var(--success-color); margin: 0; }
+        
+        #scratchCanvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            touch-action: none; 
+            z-index: 2;
+        }
+
+        #captura-cupon {
+            background: white;
+            padding: 20px;
+            border: 2px dashed var(--primary-color);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        #area-qr { display: flex; justify-content: center; margin: 15px 0; }
+        
         .hidden { display: none !important; }
+
+        .nota-recuerdo {
+            font-size: 11px;
+            color: #95a5a6;
+            margin-top: 15px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -30,36 +126,43 @@
 <div class="card">
     <div id="paso-registro">
         <h2 class="titulo">¡Promo GNC!</h2>
+        <p class="subtitulo">Ingresá tu patente para jugar.</p>
+        
         <div class="input-group">
             <label>Patente del Vehículo</label>
-            <input type="text" id="reg-patente" placeholder="ABC-123" maxlength="9">
+            <input type="text" id="reg-patente" placeholder="EJ: AF123BK" maxlength="9">
         </div>
+        
         <div class="input-group">
-            <label>Tu WhatsApp</label>
-            <input type="tel" id="reg-whatsapp" placeholder="1122334455">
+            <label>Tu WhatsApp (opcional)</label>
+            <input type="tel" id="reg-whatsapp" placeholder="1127098175">
         </div>
-        <button onclick="validarYEmpezar()" class="btn btn-principal">JUGAR AHORA</button>
+
+        <button onclick="validarYEmpezar()" class="btn btn-principal">Validar y Jugar</button>
     </div>
 
     <div id="paso-juego" class="hidden">
         <div class="scratch-container">
             <div class="prize-under">
                 <p id="texto-premio" class="monto-premio">--%</p> 
-                <p style="font-weight: bold;">DESC. GNC</p>
+                <p style="font-weight: bold; margin: 0;">DESC. GNC</p>
             </div>
             <canvas id="scratchCanvas" width="280" height="150"></canvas>
         </div>
-        <p style="color: #e67e22; font-weight: bold; margin-top: 15px;">👆 Raspá para ver tu premio</p>
+        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá para ver tu premio</p>
     </div>
 
     <div id="paso-cupon" class="hidden">
         <div id="captura-cupon">
-            <div style="font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px;">CUPÓN DE DESCUENTO GNC</div>
-            <div id="area-qr" style="display: flex; justify-content: center; padding: 15px;"></div>
-            <div id="txt-premio-foto" style="font-size: 24px; font-weight: 900; color: #27ae60;"></div>
-            <div id="txt-patente-foto" style="font-weight: bold; margin-top: 5px;"></div>
+            <div style="font-weight: 800; color: var(--secondary-color); border-bottom: 1px solid #eee; padding-bottom: 10px;">CUPÓN DE DESCUENTO</div>
+            <div id="area-qr"></div>
+            <div id="txt-premio-foto" style="font-size: 28px; font-weight: 900; color: var(--success-color);"></div>
+            <div id="txt-patente-foto" style="font-weight: bold; margin-top: 5px; font-family: monospace;"></div>
+            <div id="txt-id-foto" style="font-size: 10px; color: #bdc3c7; margin-top: 10px;"></div>
         </div>
-        <button onclick="descargarCupon()" class="btn" style="background:#3498db; color:white;">💾 GUARDAR CUPÓN</button>
+        
+        <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
+        <p class="nota-recuerdo">💡 Si cerrás esta ventana, tu cupón seguirá aquí al volver hoy.</p>
     </div>
 </div>
 
@@ -68,18 +171,31 @@
     let codigoUnico = "";
     let patenteCliente = "";
 
+    // AL CARGAR: Verificar si ya tiene un cupón de hoy
+    window.onload = function() {
+        const guardado = JSON.parse(localStorage.getItem('cupon_gnc_cliente'));
+        const hoy = new Date().toDateString();
+
+        if (guardado && guardado.fecha === hoy) {
+            mostrarPasoCupon(guardado);
+        }
+    };
+
     function validarYEmpezar() {
         patenteCliente = document.getElementById('reg-patente').value.trim().toUpperCase();
-        if (patenteCliente.length < 5) return alert("Ingresá tu patente");
+        if (patenteCliente.length < 5) {
+            alert("Por favor, ingresá una patente válida.");
+            return;
+        }
 
         const rand = Math.random() * 100;
-        if (rand < 10) premioAsignado = "20%";
-        else if (rand < 30) premioAsignado = "15%";
-        else if (rand < 70) premioAsignado = "10%";
+        if (rand < 5) premioAsignado = "20%";
+        else if (rand < 25) premioAsignado = "15%";
+        else if (rand < 60) premioAsignado = "10%";
         else premioAsignado = "5%";
 
-        codigoUnico = "GNC" + Math.random().toString(36).substr(2, 4).toUpperCase();
-        
+        codigoUnico = "GNC-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+
         document.getElementById('paso-registro').classList.add('hidden');
         document.getElementById('paso-juego').classList.remove('hidden');
         iniciarJuego();
@@ -91,8 +207,13 @@
         let isDrawing = false;
 
         document.getElementById('texto-premio').innerText = premioAsignado;
+
         ctx.fillStyle = '#bdc3c7';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#7f8c8d';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('RASPÁ AQUÍ', canvas.width / 2, canvas.height / 2 + 5);
 
         const scratch = (e) => {
             if (!isDrawing) return;
@@ -100,7 +221,7 @@
             const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
             const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 35;
+            ctx.lineWidth = 40;
             ctx.lineCap = 'round';
             ctx.beginPath();
             ctx.arc(x, y, 20, 0, Math.PI * 2);
@@ -108,33 +229,51 @@
         };
 
         canvas.addEventListener('mousedown', () => isDrawing = true);
-        window.addEventListener('mouseup', () => { isDrawing = false; checkScratch(ctx, canvas); });
+        window.addEventListener('mouseup', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
         canvas.addEventListener('mousemove', scratch);
         canvas.addEventListener('touchstart', (e) => { isDrawing = true; e.preventDefault(); }, {passive:false});
         canvas.addEventListener('touchmove', (e) => { scratch(e); e.preventDefault(); }, {passive:false});
-        canvas.addEventListener('touchend', () => { isDrawing = false; checkScratch(ctx, canvas); });
+        canvas.addEventListener('touchend', () => { isDrawing = false; verificarProgreso(ctx, canvas); });
     }
 
-    function checkScratch(ctx, canvas) {
+    function verificarProgreso(ctx, canvas) {
         const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let hits = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] === 0) hits++;
+        
         if (hits > (data.length / 4) * 0.5) {
-            document.getElementById('paso-juego').classList.add('hidden');
-            document.getElementById('paso-cupon').classList.remove('hidden');
-            document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
-            document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
-            new QRCode(document.getElementById("area-qr"), {
-                text: `ID:${codigoUnico}|VAL:${premioAsignado}`,
-                width: 140, height: 140
-            });
+            const datos = {
+                id: codigoUnico,
+                patente: patenteCliente,
+                premio: premioAsignado,
+                fecha: new Date().toDateString()
+            };
+            localStorage.setItem('cupon_gnc_cliente', JSON.stringify(datos));
+            setTimeout(() => mostrarPasoCupon(datos), 300);
         }
+    }
+
+    function mostrarPasoCupon(datos) {
+        document.getElementById('paso-registro').classList.add('hidden');
+        document.getElementById('paso-juego').classList.add('hidden');
+        document.getElementById('paso-cupon').classList.remove('hidden');
+
+        document.getElementById('txt-premio-foto').innerText = datos.premio + " OFF";
+        document.getElementById('txt-patente-foto').innerText = "PATENTE: " + datos.patente;
+        document.getElementById('txt-id-foto').innerText = "ID: " + datos.id;
+
+        const qrContainer = document.getElementById("area-qr");
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+            text: `ID:${datos.id}|VAL:${datos.premio}`,
+            width: 150, height: 150
+        });
     }
 
     function descargarCupon() {
         html2canvas(document.getElementById('captura-cupon')).then(canvas => {
             const link = document.createElement('a');
-            link.download = `Cupon-${patenteCliente}.png`;
+            link.download = `Cupon-GNC-${patenteCliente}.png`;
             link.href = canvas.toDataURL();
             link.click();
         });

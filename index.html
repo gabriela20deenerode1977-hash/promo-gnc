@@ -3,61 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Promo GNC - Raspá y Ganá</title>
+    <title>DELTA GNC - ¡Raspá y Ganá!</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- Librerías indispensables (Mantenemos QRious por compatibilidad) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         :root {
-            --primary-color: #f1c40f;
-            --secondary-color: #2c3e50;
-            --bg-color: #f8f9fa;
+            --celeste-afa: #74ACDF;
+            --blanco-puro: #FFFFFF;
+            --oro-copa: #F1C40F;
+            --oscuro-premium: #0B131E;
+            --card-bg: rgba(16, 28, 44, 0.9);
             --success-color: #27ae60;
             --whatsapp-color: #25D366;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        body { background-color: var(--bg-color); margin: 0; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 380px; text-align: center; border: 1px solid #eee; }
-        .titulo { color: var(--secondary-color); margin: 0 0 5px 0; font-size: 24px; font-weight: 800; }
-        .subtitulo { color: #7f8c8d; font-size: 14px; margin-bottom: 25px; }
-        .input-group { text-align: left; margin-bottom: 18px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-        .input-group input { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 18px; text-transform: uppercase; text-align: center; outline: none; }
-        .btn { width: 100%; border: none; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; }
-        .btn-principal { background: var(--primary-color); color: var(--secondary-color); }
-        .btn-descargar { background: #3498db; color: white; }
-        .btn-whatsapp { background: var(--whatsapp-color); color: white; }
         
-        /* Contenedor del raspable con bloqueo de scroll para que no falle el dedo */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        
+        /* Animación de fondo alusiva a la bandera argentina */
+        @keyframes fondoAlbiceleste {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body { 
+            background: linear-gradient(-45deg, #0B131E, #1C334E, #223B5A, #0B131E);
+            background-size: 400% 400%;
+            animation: fondoAlbiceleste 15s ease infinite;
+            margin: 0; 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px 25px; 
+            border-radius: 28px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4); 
+            width: 95%; 
+            max-width: 390px; 
+            text-align: center; 
+            border: 2px solid rgba(116, 172, 223, 0.4); 
+        }
+
+        /* Identidad de Negocio Estilo Premium */
+        .brand-title {
+            color: var(--blanco-puro);
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0 0 5px 0;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px rgba(116, 172, 223, 0.6);
+        }
+
+        .titulo { color: var(--celeste-afa); margin: 0 0 5px 0; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .subtitulo { color: #A0B2C6; font-size: 13px; margin-bottom: 25px; font-weight: 500; }
+        
+        /* Tres Estrellas Campeones del Mundo */
+        .estrellas {
+            color: var(--oro-copa);
+            font-size: 24px;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.8);
+            animation: pulsoEstrella 2s infinite ease-in-out;
+        }
+
+        @keyframes pulsoEstrella {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px var(--oro-copa)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 12px var(--oro-copa)); }
+        }
+
+        .input-group { text-align: left; margin-bottom: 22px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--celeste-afa); text-transform: uppercase; letter-spacing: 1px; }
+        .input-group input { 
+            width: 100%; 
+            padding: 16px; 
+            border: 2px solid rgba(116, 172, 223, 0.3); 
+            border-radius: 14px; 
+            font-size: 20px; 
+            text-transform: uppercase; 
+            text-align: center; 
+            outline: none; 
+            background: rgba(11, 19, 30, 0.7);
+            color: white;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .input-group input:focus {
+            border-color: var(--celeste-afa);
+            box-shadow: 0 0 12px rgba(116, 172, 223, 0.4);
+        }
+
+        .btn { width: 100%; border: none; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; font-size: 15px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; text-transform: uppercase; transition: transform 0.2s, cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn:active { transform: scale(0.98); }
+        
+        /* Botón estilo Campeón del Mundo */
+        .btn-principal { 
+            background: linear-gradient(135deg, var(--oro-copa) 0%, #D4AC0D 100%); 
+            color: #111; 
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.3);
+        }
+        .btn-descargar { background: #3498db; color: white; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
+        .btn-whatsapp { background: var(--whatsapp-color); color: white; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        
         .scratch-container { 
             position: relative; 
             width: 280px; 
             height: 150px; 
             margin: 0 auto; 
-            border: 5px solid var(--primary-color); 
+            border: 4px solid var(--celeste-afa); 
             border-radius: 20px; 
             overflow: hidden; 
-            background: #fff;
-            touch-action: none; /* Crucial: evita que el navegador mueva la página al raspar */
+            background: #0B131E;
+            touch-action: none;
+            box-shadow: 0 0 15px rgba(116, 172, 223, 0.3);
         }
         
         .prize-under { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1; }
-        .monto-premio { font-size: 42px; font-weight: 900; color: var(--success-color); margin: 0; }
+        .monto-premio { font-size: 46px; font-weight: 900; color: #2ecc71; margin: 0; text-shadow: 0 2px 10px rgba(46, 204, 113, 0.2); }
         #scratchCanvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
         
-        #captura-cupon { background: white; padding: 20px; border: 2px dashed var(--primary-color); border-radius: 15px; margin-bottom: 20px; }
+        /* El cupón que se descarga se mantiene limpio con fondo blanco para que sea legible en playa */
+        #captura-cupon { background: white; padding: 20px; border: 3px dashed var(--celeste-afa); border-radius: 18px; margin-bottom: 20px; color: #2c3e50; }
         #area-qr { display: flex; justify-content: center; margin: 15px 0; min-height: 150px; align-items: center; }
+        #img-qr { display: block; margin: 0 auto; width: 150px; height: 150px; }
+        
         .hidden { display: none !important; }
-        .error-msg { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; display: none; }
+        .error-msg { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold; border: 1px solid #f5c6cb; }
     </style>
 </head>
 <body>
 
 <div class="card">
+    <!-- Icono de las 3 estrellas -->
+    <div class="estrellas">⭐⭐⭐</div>
+    <h1 class="brand-title">DELTA GNC</h1>
+
+    <!-- PASO 1: REGISTRO -->
     <div id="paso-registro">
-        <h2 class="titulo">¡Promo GNC!</h2>
-        <p class="subtitulo">Ingresá tu patente para jugar.</p>
+        <h2 class="titulo">¡Raspá y Ganá!</h2>
+        <p class="subtitulo">Ingresá tu patente para participar</p>
         <div id="mensaje-error" class="error-msg"></div>
         <div class="input-group">
             <label>Patente del Vehículo</label>
@@ -66,28 +162,32 @@
         <button onclick="validarYEmpezar()" class="btn btn-principal">Validar y Jugar</button>
     </div>
 
+    <!-- PASO 2: EL JUEGO -->
     <div id="paso-juego" class="hidden">
         <div class="scratch-container" id="container">
             <div class="prize-under">
                 <p id="texto-premio" class="monto-premio"></p> 
-                <p style="font-weight: bold; margin: 0;">DESC. GNC</p>
+                <p style="font-weight: bold; margin: 0; color: #FFFFFF; font-size: 14px; letter-spacing: 1px;">DESC. GNC</p>
             </div>
             <canvas id="scratchCanvas" width="280" height="150"></canvas>
         </div>
-        <p style="color: #e67e22; font-weight: bold; margin-top: 20px;">👆 Raspá con el dedo para ganar</p>
+        <p style="color: var(--celeste-afa); font-weight: bold; margin-top: 20px; font-size: 14px; text-shadow: 0 0 5px rgba(255,255,255,0.2);">👆 Raspá con el dedo para ganar</p>
     </div>
 
+    <!-- PASO 3: EL CUPÓN -->
     <div id="paso-cupon" class="hidden">
         <div id="captura-cupon">
-            <div style="font-weight: 800; color: var(--secondary-color); border-bottom: 1px solid #eee; padding-bottom: 10px;">CUPÓN DE DESCUENTO</div>
-            <div id="area-qr"></div>
-            <div id="txt-premio-foto" style="font-size: 28px; font-weight: 900; color: var(--success-color);"></div>
-            <div id="txt-patente-foto" style="font-weight: bold; margin-top: 5px; font-family: monospace;"></div>
-            <div id="txt-id-foto" style="font-size: 10px; color: #bdc3c7; margin-top: 10px;"></div>
+            <div style="font-weight: 900; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; font-size: 16px; letter-spacing: 0.5px;">CUPÓN DE DESCUENTO</div>
+            <div id="area-qr">
+                <img id="img-qr" src="" alt="Código QR de Validación">
+            </div>
+            <div id="txt-premio-foto" style="font-size: 32px; font-weight: 900; color: var(--success-color);"></div>
+            <div id="txt-patente-foto" style="font-weight: bold; margin-top: 5px; font-family: monospace; font-size: 16px; color: #34495e;"></div>
+            <div id="txt-id-foto" style="font-size: 11px; color: #7f8c8d; margin-top: 10px; font-weight: bold;"></div>
         </div>
         <button onclick="enviarWhatsApp()" class="btn btn-whatsapp">📲 ENVIAR AL PLAYERO</button>
         <button onclick="descargarCupon()" class="btn btn-descargar">💾 GUARDAR EN GALERÍA</button>
-        <button onclick="reiniciarTodo()" class="btn" style="background:#eee; color:#666; font-size:12px;">🔄 NUEVA CARGA</button>
+        <button onclick="reiniciarTodo()" class="btn" style="background:rgba(255,255,255,0.1); color:#bdc3c7; font-size:12px; margin-top: 15px;">🔄 NUEVA CARGA</button>
     </div>
 </div>
 
@@ -137,7 +237,6 @@
         document.getElementById('paso-registro').classList.add('hidden');
         document.getElementById('paso-juego').classList.remove('hidden');
         
-        // Esperamos un milisegundo para que el canvas se dibuje bien
         setTimeout(iniciarJuego, 50);
     }
 
@@ -146,16 +245,23 @@
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         let isDrawing = false;
         
-        // Rellenar capa gris
+        // Capa gris texturizada estilo raspadita premium de AFA
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#bdc3c7';
+        ctx.fillStyle = '#34495e';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
+        // Patrón sutil de líneas
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        for(let i=0; i<canvas.width; i+=10) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+        }
+        
         // Texto guía
-        ctx.fillStyle = '#7f8c8d';
-        ctx.font = 'bold 18px Arial';
+        ctx.fillStyle = '#f1c40f';
+        ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('¡RASPÁ AQUÍ!', canvas.width / 2, canvas.height / 2 + 7);
+        ctx.fillText('⚡ ¡RASPÁ ACÁ CAMPEÓN! ⚡', canvas.width / 2, canvas.height / 2 + 6);
 
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
@@ -177,12 +283,10 @@
             ctx.fill();
         }
 
-        // Eventos Mouse
         canvas.addEventListener('mousedown', (e) => { isDrawing = true; draw(e); });
         window.addEventListener('mouseup', () => { if(isDrawing) { isDrawing = false; verificarProgreso(ctx, canvas); } });
         canvas.addEventListener('mousemove', draw);
 
-        // Eventos Touch (Celulares)
         canvas.addEventListener('touchstart', (e) => { isDrawing = true; draw(e); }, { passive: false });
         canvas.addEventListener('touchmove', (e) => { draw(e); }, { passive: false });
         canvas.addEventListener('touchend', () => { if(isDrawing) { isDrawing = false; verificarProgreso(ctx, canvas); } });
@@ -193,34 +297,46 @@
         let hits = 0;
         for (let i = 3; i < data.length; i += 4) if (data[i] === 0) hits++;
         
-        if (hits > (data.length / 4) * 0.4) { // Bajé al 40% para que sea más fácil ganar
+        if (hits > (data.length / 4) * 0.4) {
             document.getElementById('paso-juego').classList.add('hidden');
             document.getElementById('paso-cupon').classList.remove('hidden');
             document.getElementById('txt-premio-foto').innerText = premioAsignado + " OFF";
             document.getElementById('txt-patente-foto').innerText = "PATENTE: " + patenteCliente;
             document.getElementById('txt-id-foto').innerText = "ID: " + codigoUnico;
-            const qrContainer = document.getElementById("area-qr");
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: `ID:${codigoUnico}|VAL:${premioAsignado}`, width: 150, height: 150 });
+            
+            const qrElement = document.getElementById('img-qr');
+            new QRious({
+                element: qrElement,
+                value: `ID:${codigoUnico}|VAL:${premioAsignado}`,
+                size: 250,
+                level: 'H'
+            });
         }
     }
 
     function enviarWhatsApp() {
-        const mensaje = encodeURIComponent(`*⛽ NUEVO CUPÓN GNC*\n🚗 *Patente:* ${patenteCliente}\n🎁 *Premio:* ${premioAsignado} OFF\n🆔 *Código:* ${codigoUnico}`);
+        const mensaje = encodeURIComponent(
+            `*⛽ NUEVO CUPÓN GNC*\n` +
+            `🚗 *Patente:* ${patenteCliente}\n` +
+            `🎁 *Premio:* ${premioAsignado} OFF\n` +
+            `🆔 *Código:* ${codigoUnico}\n\n` +
+            `*REGLAS DE CANJE:*\n` +
+            `- 1 cupón por carga. No acumulable.`
+        );
         window.open(`https://wa.me/${TELEFONO_ESTACION}?text=${mensaje}`, '_blank');
     }
 
     function descargarCupon() {
         html2canvas(document.getElementById('captura-cupon')).then(canvas => {
             const link = document.createElement('a');
-            link.download = `GNC-${patenteCliente}.png`;
+            link.download = `DELTA-GNC-${patenteCliente}.png`;
             link.href = canvas.toDataURL();
             link.click();
         });
     }
 
     function reiniciarTodo() {
-        location.reload(); // La forma más limpia de resetear todo el motor de raspado
+        location.reload();
     }
 </script>
 </body>
